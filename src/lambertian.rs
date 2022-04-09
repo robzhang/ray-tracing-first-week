@@ -24,7 +24,7 @@ impl Material for Lambertian {
             scatter_direction = hit_info.normal;
         }
 
-        let scatter_info = ScatterInfo::new(self.albedo, Ray::new(hit_info.pos, scatter_direction));
+        let scatter_info = ScatterInfo::new(self.albedo, Ray::new(hit_info.pos, scatter_direction, _r_in.time));
         
         Some(scatter_info)
     }

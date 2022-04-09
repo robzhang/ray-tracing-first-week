@@ -26,10 +26,10 @@ use crate::lambertian::Lambertian;
 use crate::metal::Metal;
 use crate::dielectric::Dielectric;
 
-const ASPECT_RATIO: f64  = 3.0 / 2.0;
-const WIDTH:usize = 600;
+const ASPECT_RATIO: f64  = 16.0 / 9.0;
+const WIDTH:usize = 400;
 const HEIGHT:usize = (WIDTH as f64 / ASPECT_RATIO) as usize; 
-const SAMPLES_PER_PIXEL:i32 = 500;
+const SAMPLES_PER_PIXEL:i32 = 100;
 const MAX_DEPTH:i32 = 50;
 
 static IMAGE_FILE: &str = "1.ppm";
@@ -65,7 +65,9 @@ fn create_3d_world() -> World {
                     // 漫反射材质球
                     let albedo = Color::random_color().mul_color(&Color::random_color());
                     let sphere_material = Rc::new(Lambertian::new(&albedo));
-                    world.add(Box::new(Sphere::new(center, 0.2, sphere_material.clone())));
+                    let mut sphere = Box::new(Sphere::new(center, 0.2, sphere_material.clone()));
+                    sphere.move_to(&(center + Vector3::new(0.0, random_f64_range(0.0, 0.5), 0.0)), 0.0, 1.0);
+                    world.add(sphere);
                 } else if choose_mat < 0.95 {
                     // 金属球
                     let albedo = Color::random_color_range(0.5, 1.0);
@@ -100,7 +102,7 @@ fn create_camera() -> Camera {
     let dist_to_focus = 10.0;
     let aperture = 0.1;
 
-    Camera::new(lookfrom, lookat, vup, 20.0, ASPECT_RATIO, aperture, dist_to_focus)
+    Camera::new(lookfrom, lookat, vup, 20.0, ASPECT_RATIO, aperture, dist_to_focus, 0.0, 1.0)
 }
 
 fn save_image_to_file(name: String, image: Vec<Color>, image_width: usize, image_height: usize) {

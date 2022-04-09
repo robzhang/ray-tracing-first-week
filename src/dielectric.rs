@@ -46,7 +46,7 @@ impl Material for Dielectric {
             Vector3::refract(&unit_direction, &hit_info.normal, refraction_ratio)
         };
                 
-        let scattered_ray = Ray::new(hit_info.pos, direction);
+        let scattered_ray = Ray::new(hit_info.pos, direction, r_in.time);
 
         Some(ScatterInfo::new(attenuation, scattered_ray))
     }

@@ -2,7 +2,7 @@ use core::f64::INFINITY;
 
 use crate::ray::Ray;
 use crate::vector::{Vector3, Point3}; 
-use crate::utils::degrees_to_radians;
+use crate::utils::{degrees_to_radians, random_f64_range};
 use crate::world::World;
 use crate::color::Color;
 use crate::utils::random_f64;
@@ -17,10 +17,12 @@ pub struct Camera {
     v: Vector3,
     //w: Vector3,
     lens_radius: f64,
+    time_shutter_open: f64,
+    time_shutter_close: f64,
 }
 
 impl Camera {
-    pub fn new(lookfrom: Point3, lookat: Point3, vup: Vector3, vfov: f64, aspect_ratio: f64, aperture: f64, focus_distance: f64) -> Self {
+    pub fn new(lookfrom: Point3, lookat: Point3, vup: Vector3, vfov: f64, aspect_ratio: f64, aperture: f64, focus_distance: f64, time_shutter_open: f64, time_shutter_close: f64) -> Self {
         let theta = degrees_to_radians(vfov);
         let h = (theta/2.0).tan();
         let viewport_height = 2.0 * h;
@@ -44,6 +46,7 @@ impl Camera {
             vertical,
             lower_left_corner,
             u,v,lens_radius,
+            time_shutter_open, time_shutter_close
         }
     }
     pub fn get_ray(&self, u: f64, v: f64) ->Ray {//离焦模糊算法
@@ -51,8 +54,8 @@ impl Camera {
         //在相机的xy平面偏移
         let offset = self.u * rd.x + self.v * rd.y;
 
-        //只有focus plane上的点可以完美成像，离该平面越远越模糊（也就是不能在viewport平面上聚焦）
-        Ray::new(self.origin + offset, self.lower_left_corner + self.horizontal * u + self.vertical * v - self.origin - offset)
+        //只有focus plane上的点可以完美成像，离该平面越远越模糊（也就是不能在viewport平面上聚焦），最后的时间参数用于实现运动模糊效果
+        Ray::new(self.origin + offset, self.lower_left_corner + self.horizontal * u + self.vertical * v - self.origin - offset, random_f64_range(self.time_shutter_open, self.time_shutter_close))
     }
 
     pub fn take_photo(&self, world: &World, image_width: usize, image_height: usize, samples_per_pixel: i32, max_depth: i32) ->Vec<Color> {
